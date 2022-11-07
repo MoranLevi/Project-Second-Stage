@@ -4,7 +4,6 @@ import random
 import math
 import matplotlib.pyplot as plt
 
-
 # Get cities info.
 def getCity():
     cities = []
