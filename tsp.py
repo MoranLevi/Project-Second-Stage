@@ -54,6 +54,14 @@ def selectPopulation(cities, size):
 
     return population, fittest # Returns the current population and the shortest path.
 
+def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
+    parent_chromosome1 = sorted( # First parent.
+                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
+                )[0] # Selects k random paths, sorts them, and choose the shortest one.
+    parent_chromosome2 = sorted( # Second parent.
+                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
+                )[0]
+    return parent_chromosome1, parent_chromosome2
 
 # the genetic algorithm
 def geneticAlgorithm(
@@ -72,14 +80,8 @@ def geneticAlgorithm(
             # SELECTION (Tournament)
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
-                parent_chromosome1 = sorted( # First parent.
-                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
-                )[0] # Selects k random paths, sorts them, and choose the shortest one.
+                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
 
-                parent_chromosome2 = sorted( # Second parent.
-                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
-                )[0]
-                
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
                 # First child.
