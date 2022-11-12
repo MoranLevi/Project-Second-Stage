@@ -63,6 +63,41 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
                 )[0]
     return parent_chromosome1, parent_chromosome2
 
+
+def truncationSelection(trunc, population):
+    new_population = []
+    sorted_fitness = sorted(population, key=lambda x: x.fitness)
+    for i in range(0, len(population)):
+        r = random.randint((1 - trunc) * len(population), len(population))
+        new_population.append(sorted_fitness[r])
+    #return sorted_fitness[0], sorted_fitness[1] # or return new_population
+    return new_population[0], new_population[1] 
+    
+def linearRankingSelection(rate, population):
+    sorted_fitness = sorted(population, key=lambda x: x.fitness)
+    s = []
+    s.append(0)
+    new_population = []
+    p = []
+
+    for i in range(0, len(population)):
+        p.append((1 / len(population))(rate + (2 - rate - (rate))((i - 1) / (len(population) - 1))))
+
+    for i in range(1, len(population)):
+        s.append(s[i - 1] + p[i])
+
+    sSort = s.sort()
+    for i in range(0, len(population)):
+        r = random.uniform(0, s[-1])
+        pUp = 0
+        for j in range(0, len(s)):
+            if (sSort[j] > r):
+                pUp = s[j]
+        result = s.index(pUp)
+        new_population.append(sorted_fitness[result])
+
+    return new_population[0], new_population[1]   
+    
 # the genetic algorithm
 def geneticAlgorithm(
     population,
