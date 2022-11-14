@@ -1,9 +1,7 @@
-# Mahdi Hassanzadeh
-
 import random
 import math
 import matplotlib.pyplot as plt
-
+from numpy.random import choice
 
 # Get cities info.
 def getCity():
@@ -41,7 +39,7 @@ def calcDistance(cities):
     return total_sum
 
 
-# selecting the population
+# Selecting the population.
 def selectPopulation(cities, size):
     population = []
 
@@ -54,6 +52,7 @@ def selectPopulation(cities, size):
 
     return population, fittest # Returns the current population and the shortest path.
 
+# Tournament Selection.
 def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
     parent_chromosome1 = sorted( # First parent.
                     random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
@@ -63,7 +62,52 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
                 )[0]
     return parent_chromosome1, parent_chromosome2
 
-# the genetic algorithm
+# Roulette Wheel Selection.
+# https://gist.github.com/rocreguant/b14ab2c2ecb58f98ee44b4d75785b8af
+def rouletteWheelSelection(population):
+    # Computes the totallity of the population fitness.
+    population_fitness = 0
+    for i in range(len(population)):
+        population_fitness += population[i][0]
+    
+    # Computes for each chromosome the probability.
+    chromosome_probabilities = []
+    chromosomes = [] # A list of the chromosomes' indexes.
+    for i in range(len(population)):
+        chromosomes.append(i)
+        chromosome_probability = population[i][0]/population_fitness # Calculate each chromosome's probablity.
+        chromosome_probabilities.append(chromosome_probability)
+    
+    # Temporarily sort both in the order of chromosome_probabilities
+    chromosome_probabilities, chromosomes = zip(*sorted(zip(chromosome_probabilities, chromosomes)))
+    
+    # Correct probablities by swap the fitness values (the highest becomes the lowest etc...).
+    chromosome_probabilities = list(chromosome_probabilities)
+    chromosomes = list(chromosomes)
+    last_index = len(chromosome_probabilities)-1
+    for i in range(int(len(chromosome_probabilities) / 2)):
+        # Swap
+        chromosome_probabilities[i], chromosome_probabilities[last_index] = chromosome_probabilities[last_index], chromosome_probabilities[i]
+        chromosomes[i], chromosomes[last_index] = chromosomes[last_index], chromosomes[i]
+        last_index-=1
+    
+    # Restore the original order of the chromosomes.
+    chromosomes, chromosome_probabilities = zip(*sorted(zip(chromosomes, chromosome_probabilities)))
+    
+    # Selects two chromosomes based on the computed probabilities.
+    # This NumPy's "choice" function that supports probability distributions.
+    #choice (list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
+    # "replace=False" to change the behavior so that drawn items are not replaced,
+    # Default is True, meaning that a value of "a" can be selected multiple times.
+    chromosome1_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome1 = population[int(chromosome1_index)]
+    
+    chromosome2_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome2 = population[int(chromosome2_index)]
+    
+    return parent_chromosome1, parent_chromosome2
+
+# The Genetic Algorithm.
 def geneticAlgorithm(
     population,
     lenCities,
@@ -75,13 +119,13 @@ def geneticAlgorithm(
     gen_number = 0
     for i in range(200):
         new_population = []
-
         for i in range(int((len(population) - 2) / 2)):
             # SELECTION (Tournament)
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
-                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
-
+                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
+                
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
                 # First child.
