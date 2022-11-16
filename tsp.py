@@ -3,7 +3,6 @@
 import random
 import math
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Get cities info.
 def getCity():
