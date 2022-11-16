@@ -3,6 +3,7 @@
 import random
 import math
 import matplotlib.pyplot as plt
+from random import shuffle
 
 # Get cities info.
 def getCity():
@@ -70,6 +71,30 @@ def truncationSelection(trunc, population):
         new_population.append(sorted_fitness[r])
     return sorted_fitness[0], sorted_fitness[1]   
 
+def swapMutation(child_chromosome, lenCities):
+    point1 = random.randint(0, lenCities - 1)
+    point2 = random.randint(0, lenCities - 1)
+    child_chromosome[point1], child_chromosome[point2] = ( # Selects 2 random genes and exchanges them.
+        child_chromosome[point2],
+        child_chromosome[point1],
+    )
+    
+    return child_chromosome
+     
+def inversionMutation(child_chromosome):
+    point = random.randint(0, len(child_chromosome))
+    child_chromosome[0:point] = reversed(child_chromosome[0:point])
+    child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)])
+
+    return child_chromosome     
+  
+def scrambleMutation(child_chromosome):
+    point1 = random.randint(0, len(child_chromosome))
+    point2 = random.randint(0, len(child_chromosome))
+    random.shuffle(child_chromosome[point1:point2])
+    
+    return child_chromosome    
+    
 # the genetic algorithm
 def geneticAlgorithm(
     population,
@@ -112,20 +137,18 @@ def geneticAlgorithm(
             
             # MUTATION (Swap Mutation)
             if random.random() < MUTATION_RATE:
-                point1 = random.randint(0, lenCities - 1)
-                point2 = random.randint(0, lenCities - 1)
-                child_chromosome1[point1], child_chromosome1[point2] = ( # Selects 2 random genes and exchanges them.
-                    child_chromosome1[point2],
-                    child_chromosome1[point1],
-                )
-
-                point1 = random.randint(0, lenCities - 1)
-                point2 = random.randint(0, lenCities - 1)
-                child_chromosome2[point1], child_chromosome2[point2] = (
-                    child_chromosome2[point2],
-                    child_chromosome2[point1],
-                )
-
+                #Swap Mutation
+                #child_chromosome1 = swapMutation(child_chromosome1, lenCities)
+                #child_chromosome2 = swapMutation(child_chromosome2, lenCities)
+                
+                #Inversion Mutation
+                #child_chromosome1 = inversionMutation(child_chromosome1)
+                #child_chromosome2 = inversionMutation(child_chromosome2)
+                
+                #Scramble Mutation
+                child_chromosome1 = scrambleMutation(child_chromosome1)
+                child_chromosome2 = scrambleMutation(child_chromosome2)
+                
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
             
