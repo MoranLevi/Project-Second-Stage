@@ -3,7 +3,7 @@
 import random
 import math
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 # Get cities info.
 def getCity():
@@ -44,7 +44,6 @@ def calcDistance(cities):
 # selecting the population
 def selectPopulation(cities, size):
     population = []
-
     for i in range(size): # size = number of possible paths.
         c = cities.copy() # Copy in order to not change the original order of targets.
         random.shuffle(c) # Get a random path between the targets.
@@ -66,43 +65,18 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
 
 def truncationSelection(trunc, population):
     new_population = []
-    sorted_fitness = sorted(population, key=lambda x: x.fitness)
+    sorted_fitness = sorted(population, key=lambda x: int(x[0]))
     for i in range(0, len(population)):
-        r = random.randint((1 - trunc) * len(population), len(population))
+        r = random.randint((1 - trunc) * len(population), len(population) - 1)
         new_population.append(sorted_fitness[r])
-    #return sorted_fitness[0], sorted_fitness[1] # or return new_population
-    return new_population[0], new_population[1] 
-    
-def linearRankingSelection(rate, population):
-    sorted_fitness = sorted(population, key=lambda x: x.fitness)
-    s = []
-    s.append(0)
-    new_population = []
-    p = []
+    return sorted_fitness[0], sorted_fitness[1]   
 
-    for i in range(0, len(population)):
-        p.append((1 / len(population))(rate + (2 - rate - (rate))((i - 1) / (len(population) - 1))))
-
-    for i in range(1, len(population)):
-        s.append(s[i - 1] + p[i])
-
-    sSort = s.sort()
-    for i in range(0, len(population)):
-        r = random.uniform(0, s[-1])
-        pUp = 0
-        for j in range(0, len(s)):
-            if (sSort[j] > r):
-                pUp = s[j]
-        result = s.index(pUp)
-        new_population.append(sorted_fitness[result])
-
-    return new_population[0], new_population[1]   
-    
 # the genetic algorithm
 def geneticAlgorithm(
     population,
     lenCities,
     TOURNAMENT_SELECTION_SIZE,
+    TRUNC_SELECTION_SIZE,
     MUTATION_RATE,
     CROSSOVER_RATE,
     TARGET,
@@ -116,6 +90,8 @@ def geneticAlgorithm(
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
                 parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
+
 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
@@ -134,7 +110,7 @@ def geneticAlgorithm(
             else: # Choose two random paths.
                 child_chromosome1 = random.choices(population)[0][1]
                 child_chromosome2 = random.choices(population)[0][1]
-
+            
             # MUTATION (Swap Mutation)
             if random.random() < MUTATION_RATE:
                 point1 = random.randint(0, lenCities - 1)
@@ -153,7 +129,7 @@ def geneticAlgorithm(
 
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
-        
+            
         # REPLACEMENT
         # Selecting two of the best options we have (elitism).
         new_population.append(sorted(population)[0])
@@ -162,7 +138,6 @@ def geneticAlgorithm(
         population = new_population
 
         gen_number += 1
-
         if gen_number % 10 == 0: # Prints shortest path every 10 rounds.
             print(gen_number, sorted(population)[0][0])
 
@@ -200,6 +175,7 @@ def main():
     # Initial values.
     POPULATION_SIZE = 2000 # = number of possible paths.
     TOURNAMENT_SELECTION_SIZE = 4
+    TRUNC_SELECTION_SIZE = 0.1
     MUTATION_RATE = 0.1
     CROSSOVER_RATE = 0.9
     TARGET = 450.0
@@ -210,6 +186,7 @@ def main():
         firstPopulation,
         len(cities),
         TOURNAMENT_SELECTION_SIZE,
+        TRUNC_SELECTION_SIZE,
         MUTATION_RATE,
         CROSSOVER_RATE,
         TARGET,
