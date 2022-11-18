@@ -120,11 +120,11 @@ def geneticAlgorithm(
     for i in range(200):
         new_population = []
         for i in range(int((len(population) - 2) / 2)):
-            # SELECTION (Tournament)
+            # SELECTION
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
-                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
-                parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
+                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
