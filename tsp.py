@@ -135,7 +135,7 @@ def geneticAlgorithm(
                 child_chromosome1 = random.choices(population)[0][1]
                 child_chromosome2 = random.choices(population)[0][1]
             
-            # MUTATION (Swap Mutation)
+            # MUTATION
             if random.random() < MUTATION_RATE:
                 #Swap Mutation
                 #child_chromosome1 = swapMutation(child_chromosome1, lenCities)
