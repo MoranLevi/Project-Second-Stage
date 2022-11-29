@@ -1,9 +1,8 @@
-# Mahdi Hassanzadeh
-
 import random
 import math
 import matplotlib.pyplot as plt
 from random import shuffle
+from numpy.random import choice
 
 # Get cities info.
 def getCity():
@@ -41,7 +40,7 @@ def calcDistance(cities):
     return total_sum
 
 
-# selecting the population
+# Selecting the population.
 def selectPopulation(cities, size):
     population = []
     for i in range(size): # size = number of possible paths.
@@ -53,6 +52,7 @@ def selectPopulation(cities, size):
 
     return population, fittest # Returns the current population and the shortest path.
 
+# Tournament Selection.
 def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
     parent_chromosome1 = sorted( # First parent.
                     random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
@@ -62,40 +62,119 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
                 )[0]
     return parent_chromosome1, parent_chromosome2
 
-
 def truncationSelection(trunc, population):
     new_population = []
     sorted_fitness = sorted(population, key=lambda x: int(x[0]))
     for i in range(0, len(population)):
         r = random.randint((1 - trunc) * len(population), len(population) - 1)
         new_population.append(sorted_fitness[r])
-    return sorted_fitness[0], sorted_fitness[1]   
+    return sorted_fitness[0], sorted_fitness[1]     
 
+# Roulette Wheel Selection.
+# https://gist.github.com/rocreguant/b14ab2c2ecb58f98ee44b4d75785b8af
+def rouletteWheelSelection(population):
+    # Computes the totallity of the population fitness.
+    population_fitness = 0
+    for i in range(len(population)):
+        population_fitness += population[i][0]
+    
+    # Computes for each chromosome the probability.
+    chromosome_probabilities = []
+    chromosomes = [] # A list of the chromosomes' indexes.
+    for i in range(len(population)):
+        chromosomes.append(i)
+        chromosome_probability = population[i][0]/population_fitness # Calculate each chromosome's probablity.
+        chromosome_probabilities.append(chromosome_probability)
+    
+    # Temporarily sort both in the order of chromosome_probabilities
+    chromosome_probabilities, chromosomes = zip(*sorted(zip(chromosome_probabilities, chromosomes)))
+    
+    # Correct probablities by swap the fitness values (the highest becomes the lowest etc...).
+    chromosome_probabilities = list(chromosome_probabilities)
+    chromosomes = list(chromosomes)
+    last_index = len(chromosome_probabilities)-1
+    for i in range(int(len(chromosome_probabilities) / 2)):
+        # Swap
+        chromosome_probabilities[i], chromosome_probabilities[last_index] = chromosome_probabilities[last_index], chromosome_probabilities[i]
+        chromosomes[i], chromosomes[last_index] = chromosomes[last_index], chromosomes[i]
+        last_index-=1
+    
+    # Restore the original order of the chromosomes.
+    chromosomes, chromosome_probabilities = zip(*sorted(zip(chromosomes, chromosome_probabilities)))
+    
+    # Selects two chromosomes based on the computed probabilities.
+    # This NumPy's "choice" function that supports probability distributions.
+    # choice(list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
+    # "replace=False" to change the behavior so that drawn items are not replaced,
+    # Default is True, meaning that a value of "a" can be selected multiple times.
+    chromosome1_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome1 = population[int(chromosome1_index)]
+    
+    chromosome2_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome2 = population[int(chromosome2_index)]
+    
+    return parent_chromosome1, parent_chromosome2
+
+
+def rankSelection(population):
+    sorted_population = sorted(population)
+    ranked_population = []
+    
+    # Add rank to each chromosome.
+    # The fittest gets the highest rank.
+    # That because will make its probability the highest.
+    sum_of_probablities = 0
+    rank = len(population)
+    for i in range(len(population)):
+        #probability = rank/len(population)
+        #ranked_population.append([probability, sorted_population[i]])
+        ranked_population.append([rank, sorted_population[i]])
+        sum_of_probablities += rank
+        rank -= 1
+    
+    # Computes for each chromosome the probability.
+    chromosome_probabilities = []
+    chromosomes = [] # A list of the chromosomes' indexes.
+    for i in range(len(population)):
+        chromosomes.append(i)
+        chromosome_probability = ranked_population[i][0]/sum_of_probablities # Calculate each chromosome's probablity.
+        chromosome_probabilities.append(chromosome_probability)
+    
+    # Selects two chromosomes based on the computed probabilities.
+    # This NumPy's "choice" function that supports probability distributions.
+    # choice(list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
+    # "replace=False" to change the behavior so that drawn items are not replaced,
+    # Default is True, meaning that a value of "a" can be selected multiple times.
+    chromosome1_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome1 = sorted_population[int(chromosome1_index)]
+    
+    chromosome2_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    parent_chromosome2 = sorted_population[int(chromosome2_index)]
+    
+    return parent_chromosome1, parent_chromosome2
+    
 def swapMutation(child_chromosome, lenCities):
     point1 = random.randint(0, lenCities - 1)
     point2 = random.randint(0, lenCities - 1)
     child_chromosome[point1], child_chromosome[point2] = ( # Selects 2 random genes and exchanges them.
         child_chromosome[point2],
         child_chromosome[point1],
-    )
-    
+    )  
     return child_chromosome
      
 def inversionMutation(child_chromosome):
     point = random.randint(0, len(child_chromosome))
     child_chromosome[0:point] = reversed(child_chromosome[0:point])
     child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)])
-
     return child_chromosome     
   
 def scrambleMutation(child_chromosome):
     point1 = random.randint(0, len(child_chromosome))
     point2 = random.randint(0, len(child_chromosome))
     random.shuffle(child_chromosome[point1:point2])
-    
-    return child_chromosome    
-    
-# the genetic algorithm
+    return child_chromosome  
+
+# The Genetic Algorithm.
 def geneticAlgorithm(
     population,
     lenCities,
@@ -108,15 +187,16 @@ def geneticAlgorithm(
     gen_number = 0
     for i in range(200):
         new_population = []
-
         for i in range(int((len(population) - 2) / 2)):
-            # SELECTION (Tournament)
+            # SELECTION
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
                 parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
-
-
+                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
+                #parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
                 # First child.
@@ -138,16 +218,16 @@ def geneticAlgorithm(
             # MUTATION
             if random.random() < MUTATION_RATE:
                 #Swap Mutation
-                #child_chromosome1 = swapMutation(child_chromosome1, lenCities)
-                #child_chromosome2 = swapMutation(child_chromosome2, lenCities)
+                child_chromosome1 = swapMutation(child_chromosome1, lenCities)
+                child_chromosome2 = swapMutation(child_chromosome2, lenCities)
                 
                 #Inversion Mutation
                 #child_chromosome1 = inversionMutation(child_chromosome1)
                 #child_chromosome2 = inversionMutation(child_chromosome2)
                 
                 #Scramble Mutation
-                child_chromosome1 = scrambleMutation(child_chromosome1)
-                child_chromosome2 = scrambleMutation(child_chromosome2)
+                #child_chromosome1 = scrambleMutation(child_chromosome1)
+                #child_chromosome2 = scrambleMutation(child_chromosome2)
                 
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
