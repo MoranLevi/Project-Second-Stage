@@ -3,6 +3,9 @@ import math
 import matplotlib.pyplot as plt
 from random import shuffle
 from numpy.random import choice
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+import numpy as np
 
 # Get cities info.
 def getCity():
@@ -193,7 +196,6 @@ def geneticAlgorithm(
             if random_number < CROSSOVER_RATE:
                 parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
-                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
                 #parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
@@ -282,26 +284,37 @@ def main():
     CROSSOVER_RATE = 0.9
     TARGET = 450.0
 
-    cities = getCity()
-    firstPopulation, firstFittest = selectPopulation(cities, POPULATION_SIZE)
-    answer, genNumber = geneticAlgorithm(
-        firstPopulation,
-        len(cities),
-        TOURNAMENT_SELECTION_SIZE,
-        TRUNC_SELECTION_SIZE,
-        MUTATION_RATE,
-        CROSSOVER_RATE,
-        TARGET,
-    )
+    results = []
+    
+    for i in range(100):
+        cities = getCity()
+        firstPopulation, firstFittest = selectPopulation(cities, POPULATION_SIZE)
+        answer, genNumber = geneticAlgorithm(
+            firstPopulation,
+            len(cities),
+            TOURNAMENT_SELECTION_SIZE,
+            TRUNC_SELECTION_SIZE,
+            MUTATION_RATE,
+            CROSSOVER_RATE,
+            TARGET,
+        )
+    
+        print("\n----------------------------------------------------------------")
+        print("Generation: " + str(genNumber))
+        #print("Fittest chromosome distance before training: " + str(firstFittest[0]))
+        print("Fittest chromosome distance after training: " + str(answer[0]))
+        #print("Target distance: " + str(TARGET))
+        print("----------------------------------------------------------------\n")
+        results.append(answer[0])
+    
+        drawMap(cities, answer)
 
-    print("\n----------------------------------------------------------------")
-    print("Generation: " + str(genNumber))
-    print("Fittest chromosome distance before training: " + str(firstFittest[0]))
-    print("Fittest chromosome distance after training: " + str(answer[0]))
-    print("Target distance: " + str(TARGET))
-    print("----------------------------------------------------------------\n")
-
-    drawMap(cities, answer)
-
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.plot(results)
+    plt.xlabel('Runs')
+    plt.ylabel('Distances [KM]')
+    plt.xticks(np.arange(len(results)), np.arange(1, len(results)+1))
+    plt.show()
 
 main()
