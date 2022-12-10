@@ -83,9 +83,9 @@ def rouletteWheelSelection(population):
     
     # Computes for each chromosome the probability.
     chromosome_probabilities = []
-    chromosomes = [] # A list of the chromosomes' indexes.
+    chromosomes = chromosomes = list(range(len(population))) # A list of the chromosomes' indexes.
+    
     for i in range(len(population)):
-        chromosomes.append(i)
         chromosome_probability = population[i][0]/population_fitness # Calculate each chromosome's probablity.
         chromosome_probabilities.append(chromosome_probability)
     
@@ -93,27 +93,35 @@ def rouletteWheelSelection(population):
     chromosome_probabilities, chromosomes = zip(*sorted(zip(chromosome_probabilities, chromosomes)))
     
     # Correct probablities by swap the fitness values (the highest becomes the lowest etc...).
+    #chromosomes = list(chromosomes)
     chromosome_probabilities = list(chromosome_probabilities)
-    chromosomes = list(chromosomes)
     last_index = len(chromosome_probabilities)-1
-    for i in range(int(len(chromosome_probabilities) / 2)):
+    for i in range(int(len(chromosomes) / 2)):
         # Swap
         chromosome_probabilities[i], chromosome_probabilities[last_index] = chromosome_probabilities[last_index], chromosome_probabilities[i]
-        chromosomes[i], chromosomes[last_index] = chromosomes[last_index], chromosomes[i]
+        #chromosomes[i], chromosomes[last_index] = chromosomes[last_index], chromosomes[i]
         last_index-=1
     
+    # Correct probablities by swap the fitness values (the highest becomes the lowest etc...).
+    #chromosome_probabilities = list(chromosome_probabilities)
+    #chromosomes = list(chromosomes)
+    #last_index = len(chromosome_probabilities)-1
+    #for i in range(int(len(chromosome_probabilities) / 2)):
+        # Swap
+     #   chromosome_probabilities[i], chromosome_probabilities[last_index] = chromosome_probabilities[last_index], chromosome_probabilities[i]
+      #  chromosomes[i], chromosomes[last_index] = chromosomes[last_index], chromosomes[i]
+       # last_index-=1
+    
     # Restore the original order of the chromosomes.
-    chromosomes, chromosome_probabilities = zip(*sorted(zip(chromosomes, chromosome_probabilities)))
+    #chromosomes, chromosome_probabilities = zip(*sorted(zip(chromosomes, chromosome_probabilities)))
     
     # Selects two chromosomes based on the computed probabilities.
     # This NumPy's "choice" function that supports probability distributions.
     # choice(list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
     # "replace=False" to change the behavior so that drawn items are not replaced,
     # Default is True, meaning that a value of "a" can be selected multiple times.
-    chromosome1_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    chromosome1_index, chromosome2_index = choice(chromosomes, 2, replace=False, p=chromosome_probabilities)
     parent_chromosome1 = population[int(chromosome1_index)]
-    
-    chromosome2_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
     parent_chromosome2 = population[int(chromosome2_index)]
     
     return parent_chromosome1, parent_chromosome2
@@ -129,17 +137,14 @@ def rankSelection(population):
     sum_of_probablities = 0
     rank = len(population)
     for i in range(len(population)):
-        #probability = rank/len(population)
-        #ranked_population.append([probability, sorted_population[i]])
         ranked_population.append([rank, sorted_population[i]])
         sum_of_probablities += rank
         rank -= 1
     
     # Computes for each chromosome the probability.
     chromosome_probabilities = []
-    chromosomes = [] # A list of the chromosomes' indexes.
+    chromosomes = list(range(len(population))) # A list of the chromosomes' indexes.
     for i in range(len(population)):
-        chromosomes.append(i)
         chromosome_probability = ranked_population[i][0]/sum_of_probablities # Calculate each chromosome's probablity.
         chromosome_probabilities.append(chromosome_probability)
     
@@ -148,10 +153,8 @@ def rankSelection(population):
     # choice(list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
     # "replace=False" to change the behavior so that drawn items are not replaced,
     # Default is True, meaning that a value of "a" can be selected multiple times.
-    chromosome1_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
+    chromosome1_index, chromosome2_index = choice(chromosomes, 2, replace=False, p=chromosome_probabilities)
     parent_chromosome1 = sorted_population[int(chromosome1_index)]
-    
-    chromosome2_index = choice(chromosomes, 1, replace=False, p=chromosome_probabilities)
     parent_chromosome2 = sorted_population[int(chromosome2_index)]
     
     return parent_chromosome1, parent_chromosome2
@@ -194,9 +197,9 @@ def geneticAlgorithm(
             # SELECTION
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
-                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
-                #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
+                parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
                 #parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
@@ -301,9 +304,9 @@ def main():
     
         print("\n----------------------------------------------------------------")
         print("Generation: " + str(genNumber))
-        #print("Fittest chromosome distance before training: " + str(firstFittest[0]))
+        print("Fittest chromosome distance before training: " + str(firstFittest[0]))
         print("Fittest chromosome distance after training: " + str(answer[0]))
-        #print("Target distance: " + str(TARGET))
+        print("Target distance: " + str(TARGET))
         print("----------------------------------------------------------------\n")
         results.append(answer[0])
     
