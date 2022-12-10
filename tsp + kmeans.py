@@ -192,7 +192,7 @@ def geneticAlgorithm(
     #TARGET,
 ):
     gen_number = 0
-    for i in range(30):
+    for i in range(200):
         new_population = []
         for i in range(int((len(population) - 2) / 2)):
             # SELECTION
@@ -300,7 +300,7 @@ def main():
     color = ""
     
     cities = getCity()
-    for i in range(4):
+    for i in range(100):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K)
         kmeans.fit(cities)
