@@ -350,6 +350,10 @@ def main():
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.plot(results, 'bo-')
+    run = 0
+    for res in results:
+        plt.annotate(str(round(res, 2)), (run, res))
+        run += 1
     plt.xlabel('Runs')
     plt.ylabel('Distances [m]')
     plt.xticks(np.arange(len(results)), np.arange(1, len(results)+1))
