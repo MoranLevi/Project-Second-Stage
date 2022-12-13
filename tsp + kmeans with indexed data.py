@@ -15,7 +15,7 @@ def getCity():
     for i in f.readlines():
         node_city_val = i.split()
         cities.append(
-            [float(node_city_val[0]), float(node_city_val[1])]
+            [node_city_val[0], float(node_city_val[1]), float(node_city_val[2])]
         )
 
     return cities
@@ -29,7 +29,7 @@ def calcDistance(cities):
         cityB = cities[i + 1]
 
         d = math.sqrt(
-            math.pow(cityB[0] - cityA[0], 2) + math.pow(cityB[1] - cityA[1], 2)
+            math.pow(cityB[1] - cityA[1], 2) + math.pow(cityB[2] - cityA[2], 2)
         )
 
         total_sum += d
@@ -37,7 +37,7 @@ def calcDistance(cities):
     # Adds the distance also between the first and the last targets.
     cityA = cities[0]
     cityB = cities[-1] # The last target.
-    d = math.sqrt(math.pow(cityB[0] - cityA[0], 2) + math.pow(cityB[1] - cityA[1], 2))
+    d = math.sqrt(math.pow(cityB[1] - cityA[1], 2) + math.pow(cityB[2] - cityA[2], 2))
 
     total_sum += d
 
@@ -192,8 +192,7 @@ def geneticAlgorithm(
     #TARGET,
 ):
     gen_number = 0
-    count = 0
-    for i in range(200):
+    for i in range(30):
         new_population = []
         for i in range(int((len(population) - 2) / 2)):
             # SELECTION
@@ -244,14 +243,6 @@ def geneticAlgorithm(
         new_population.append(sorted(population)[0])
         new_population.append(sorted(population)[1])
         
-        if new_population.sort() == population.sort(): # Increase count when there's no change in population.
-            count += 1
-        else:
-            count = 0
-        
-        if count == 50: # If 10 generations stay the same, no need to continue.
-            break
-        
         population = new_population
 
         gen_number += 1
@@ -267,26 +258,24 @@ def geneticAlgorithm(
 
 # Draw cities and answer map.
 def drawMap(city, answer, color):
-    city_index = 1
     for j in city: # Draws the targets.
-        plt.plot(j[0], j[1], "ro") # "ro" = red marking for each target.
-        plt.annotate(city_index, (j[0], j[1])) # Adds the index for each target: j[0] = index, j[1] = x, j[2] = y.
-        city_index += 1
+        plt.plot(j[1], j[2], "ro") # "ro" = red marking for each target.
+        plt.annotate(j[0], (j[1], j[2])) # Adds the index for each target: j[0] = index, j[1] = x, j[2] = y.
 
     for i in range(len(answer[1])): # Draws the line between the targets.
         try:
             first = answer[1][i]
-            second = answer[1][i + 1]
-            #plt.plot([first[1], second[1]], [first[2], second[2]], "gray")
-            plt.plot([first[0], second[0]], [first[1], second[1]], color)
+            secend = answer[1][i + 1]
+            #plt.plot([first[1], secend[1]], [first[2], secend[2]], "gray")
+            plt.plot([first[1], secend[1]], [first[2], secend[2]], color)
         except: # In case there is an out of range exception (because of i+1).
             continue
 
     # Draws the line between the first and the last targets.
     first = answer[1][0]
-    second = answer[1][-1]
-    #plt.plot([first[1], second[1]], [first[2], second[2]], "gray")
-    plt.plot([first[0], second[0]], [first[1], second[1]], color)
+    secend = answer[1][-1]
+    #plt.plot([first[1], secend[1]], [first[2], secend[2]], "gray")
+    plt.plot([first[1], secend[1]], [first[2], secend[2]], color)
 
     #plt.show()
 
@@ -297,7 +286,7 @@ def getCluster(cities, labels, label_index):
     for index in cluster_index[0]:
         cluster.append(cities[index])
     return cluster
-       
+      
 def main():
     # Initial values.
     POPULATION_SIZE = 2000 # = number of possible paths.
@@ -306,12 +295,12 @@ def main():
     MUTATION_RATE = 0.1
     CROSSOVER_RATE = 0.9
     #TARGET = 450.0 # Length of shortest path between all cities.
-    K = 6
+    K = 4
     results = []
     color = ""
     
     cities = getCity()
-    for i in range(1):
+    for i in range(4):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K)
         #cities = df[['col2', 'col3']]
