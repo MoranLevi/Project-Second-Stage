@@ -311,7 +311,8 @@ def main():
     color = ""
     
     cities = getCity()
-    for i in range(1):
+
+    for i in range(100):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K)
         #cities = df[['col2', 'col3']]
