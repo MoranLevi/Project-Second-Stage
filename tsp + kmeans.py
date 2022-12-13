@@ -249,7 +249,7 @@ def geneticAlgorithm(
         else:
             count = 0
         
-        if count == 50: # If 10 generations stay the same, no need to continue.
+        if count == 51: # If 10 generations stay the same, no need to continue.
             break
         
         population = new_population
@@ -312,7 +312,7 @@ def main():
     
     cities = getCity()
 
-    for i in range(100):
+    for i in range(10):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K)
         #cities = df[['col2', 'col3']]
