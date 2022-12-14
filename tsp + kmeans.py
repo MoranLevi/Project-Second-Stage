@@ -193,16 +193,16 @@ def geneticAlgorithm(
 ):
     gen_number = 0
     count = 0
-    for i in range(200):
+    for i in range(10):
         new_population = []
         for i in range(int((len(population) - 2) / 2)):
             # SELECTION
             random_number = random.random() # Returns a random number between 0.0 - 1.0.
             if random_number < CROSSOVER_RATE:
-                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
                 #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
-                #parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
@@ -241,22 +241,26 @@ def geneticAlgorithm(
             
         # REPLACEMENT
         # Selecting two of the best options we have (elitism).
-        new_population.append(sorted(population)[0])
-        new_population.append(sorted(population)[1])
+        sortedPopOld = sorted(population)
+        new_population.append(sortedPopOld[0])
+        new_population.append(sortedPopOld[1])
         
-        if new_population.sort() == population.sort(): # Increase count when there's no change in population.
-            count += 1
-        else:
-            count = 0
+        #sortedPopNew = sorted(new_population)
+        #sortedPopOld.sort()
+        #sortedPopNew.sort()
+        #if sortedPopNew == sortedPopOld: # Increase count when there's no change in population.
+         #   count += 1
+        #else:
+         #   count = 0
         
-        if count == 51: # If 10 generations stay the same, no need to continue.
-            break
+        #if count == 51: # If 10 generations stay the same, no need to continue.
+         #   break
         
         population = new_population
 
         gen_number += 1
-        if gen_number % 10 == 0: # Prints shortest path every 10 rounds.
-            print(gen_number, sorted(population)[0][0])
+        #if gen_number % 10 == 0: # Prints shortest path every 10 rounds.
+        print(gen_number, sorted(population)[0][0])
 
         #if sorted(population)[0][0] < TARGET: # TO BE REMOVED!!! We can't know what is the real shortest path.
             #break
@@ -306,13 +310,13 @@ def main():
     MUTATION_RATE = 0.1
     CROSSOVER_RATE = 0.9
     #TARGET = 450.0 # Length of shortest path between all cities.
-    K = 6
+    K = 4
     results = []
     color = ""
     
     cities = getCity()
 
-    for i in range(10):
+    for i in range(1):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K)
         #cities = df[['col2', 'col3']]
@@ -357,6 +361,7 @@ def main():
             drawMap(cities, answer, color)
             sum_subgroups += answer[0]
         #################### END OF LOOP
+        plt.title('Total shortest Distance = ' + str(round(sum_subgroups, 2)))
         plt.show()
         results.append(sum_subgroups)
 
@@ -367,8 +372,8 @@ def main():
     for res in results:
         plt.annotate(str(round(res, 2)), (run, res))
         run += 1
-    plt.xlabel('Runs')
-    plt.ylabel('Distances [m]')
+    plt.xlabel('Iteration')
+    plt.ylabel('Distance')
     plt.xticks(np.arange(len(results)), np.arange(1, len(results)+1))
     plt.show()
 
