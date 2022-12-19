@@ -63,18 +63,36 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
                 )[0] # Selects k random paths, sorts them, and choose the shortest one.
     parent_chromosome2 = sorted( # Second parent.
                     random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
-                )[0]
+                )[0] # Selects k random paths, sorts them, and choose the shortest one.
     return parent_chromosome1, parent_chromosome2
 
-def truncationSelection(trunc, population):
+# Trunaction Selection.
+def truncationSelectionOLD(trunc, population):
     new_population = []
+    
+    # Sort the chromosomes according to their fitness value (distance).
     sorted_fitness = sorted(population, key=lambda x: int(x[0]))
+    
     for i in range(0, len(population)):
         r = random.randint((1 - trunc) * len(population), len(population) - 1)
         new_population.append(sorted_fitness[r])
-    return sorted_fitness[0], sorted_fitness[1]     
+        
+    return sorted_fitness[0], sorted_fitness[1]
 
+# Trunaction Selection.
+def truncationSelection(trunc, population):
+    new_population = []
+    
+    # Sort the chromosomes according to their fitness value (distance).
+    sorted_fitness = sorted(population, key=lambda x: int(x[0]))
+    
+    for i in range(0, len(population)):
+        r = random.randint((1 - trunc) * len(population), len(population) - 1)
+        new_population.append(sorted_fitness[r])
+        
+    return sorted_fitness[0], sorted_fitness[1] 
 
+# Rank Selection.
 def rankSelection(population):
     sorted_population = sorted(population)
     ranked_population = []
@@ -106,7 +124,8 @@ def rankSelection(population):
     parent_chromosome2 = sorted_population[int(chromosome2_index)]
     
     return parent_chromosome1, parent_chromosome2
-    
+
+# Swap Mutation.
 def swapMutation(child_chromosome, lenCities):
     point1 = random.randint(0, lenCities - 1)
     point2 = random.randint(0, lenCities - 1)
@@ -115,38 +134,60 @@ def swapMutation(child_chromosome, lenCities):
         child_chromosome[point1],
     )  
     return child_chromosome
-     
+
+
+# Inversion Mutation.
 def inversionMutation(child_chromosome):
-    point = random.randint(0, len(child_chromosome))
-    child_chromosome[0:point] = reversed(child_chromosome[0:point])
-    child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)])
-    return child_chromosome     
-  
+    point = random.randint(0, len(child_chromosome)) # Select random index.
+    child_chromosome[0:point] = reversed(child_chromosome[0:point]) # Reverse the targets from the beginning of the chromosome to the selected index.
+    child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)]) # Reverse the targets from the selected index to the end of chromosome.
+    return child_chromosome
+
+# Inversion Mutation.
+def inversionMutation2(child_chromosome):
+    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    
+    if(point1 > point2):
+        temp = point1
+        point1 = point2
+        point2 = temp
+        
+    child_chromosome[point1:point2+1] = reversed(child_chromosome[point1:point2+1]) # Reverse the targets between the two indexes.
+    return child_chromosome 
+
+# Scramble Mutation.
 def scrambleMutation(child_chromosome):
-    point1 = random.randint(0, len(child_chromosome))
-    point2 = random.randint(0, len(child_chromosome))
-    random.shuffle(child_chromosome[point1:point2])
+    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    
+    if(point1 > point2):
+        temp = point1
+        point1 = point2
+        point2 = temp
+        
+    random.shuffle(child_chromosome[point1:point2]) # Mix the targets within the two selected index.
     return child_chromosome  
 
 # The Genetic Algorithm.
 def geneticAlgorithm(
     population,
-    lenCities,
-    TOURNAMENT_SELECTION_SIZE,
-    TRUNC_SELECTION_SIZE,
-    MUTATION_RATE,
-    CROSSOVER_RATE,
+    lenCities, # The number of targets.
+    TOURNAMENT_SELECTION_SIZE, # The number of random chromosomes to compete to select 2 parents from them.
+    TRUNC_SELECTION_SIZE, # The percentage of the best chromosomes within the population to be selected for the next generation.
+    MUTATION_RATE, # The probability to perform a mutation operator.
+    CROSSOVER_RATE, # The probability to perform a crossover operator.
 ):
-    gen_number = 0
+    gen_number = 0 # The generation index.
     
-    for i in range(200):
+    for i in range(20): # The number of generations.
         new_population = []
-        for i in range(int((len(population) - 2) / 2)):
+        
+        for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
             # SELECTION
             if random.random() < CROSSOVER_RATE: # random.random() Returns a random number between 0.0 - 1.0.
                 #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
-                #parent_chromosome1, parent_chromosome2 = rouletteWheelSelection(population)
                 parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
@@ -177,10 +218,15 @@ def geneticAlgorithm(
                 #child_chromosome1 = inversionMutation(child_chromosome1)
                 #child_chromosome2 = inversionMutation(child_chromosome2)
                 
+                #Inversion Mutation2
+                #child_chromosome1 = inversionMutation2(child_chromosome1)
+                #child_chromosome2 = inversionMutation2(child_chromosome2)
+                
                 #Scramble Mutation
                 #child_chromosome1 = scrambleMutation(child_chromosome1)
                 #child_chromosome2 = scrambleMutation(child_chromosome2)
-                
+            
+            # Adding the two children to the new population.
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
             
@@ -243,7 +289,7 @@ def main():
     
     cities = getCity() # Read targets from file.
 
-    for i in range(100):
+    for i in range(3):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
         kmeans.fit(cities) # Fill the clusters with the targets.
@@ -296,8 +342,8 @@ def main():
         plt.show()
         results.append(sum_clusters)
 
-    ax = plt.figure().gca()
-    ax.xaxis.set_macluster_indexor_locator(MaxNLocator(integer=True))
+    #ax = plt.figure().gca()
+    #ax.xaxis.set_macluster_indexor_locator(MaxNLocator(integer=True))
     plt.plot(results, 'bo-')
     run = 0
     for res in results:
