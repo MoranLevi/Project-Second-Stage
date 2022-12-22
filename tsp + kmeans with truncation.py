@@ -71,20 +71,22 @@ def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
     return parent_chromosome1, parent_chromosome2
 
 # Trunaction Selection.
-def truncationSelectionOLD(trunc, population):
-    new_population = []
+def truncationSelection(trunc, population):
     
-    # Sort the chromosomes according to their fitness value (distance).
-    sorted_fitness = sorted(population, key=lambda x: int(x[0]))
-    
-    for i in range(0, len(population)):
-        r = random.randint((1 - trunc) * len(population), len(population) - 1)
-        new_population.append(sorted_fitness[r])
+    # Sort the population by fitness value in ascending order
+    sorted_population = sorted(population, key=lambda x: int(x[0]), reverse=False)
+
+    # Calculate the number of individuals to retain
+    num_individuals_to_retain = int(len(sorted_population) * trunc)
+
+    if num_individuals_to_retain < 1:
+        num_individuals_to_retain = 1
         
-    return sorted_fitness[0], sorted_fitness[1]
+    # Return the top "num_individuals_to_retain" individuals from the sorted population
+    return sorted_population[:num_individuals_to_retain]
 
 # Trunaction Selection.
-def truncationSelection(trunc, population):
+def truncationSelectionOLD(trunc, population):
     new_population = []
     
     # Sort the chromosomes according to their fitness value (distance).
@@ -184,15 +186,21 @@ def geneticAlgorithm(
 ):
     gen_number = 0 # The generation index.
     
+    
     for i in range(20): # The number of generations.
         new_population = []
         
+        # SELECTION
+        population = truncationSelection(TRUNC_SELECTION_SIZE, population)
+        if len(population) == 1:
+            break;
         for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
-            # SELECTION
             if random.random() < CROSSOVER_RATE: # random.random() Returns a random number between 0.0 - 1.0.
                 #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
                 #parent_chromosome1, parent_chromosome2 = truncationSelection(TRUNC_SELECTION_SIZE, population) 
-                parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                #parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                parent_chromosome1 = random.choice(population)
+                parent_chromosome2 = random.choice(population)
                 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(0, lenCities - 1) # Selects a random index.
@@ -236,11 +244,15 @@ def geneticAlgorithm(
             
         # REPLACEMENT
         # Selecting two of the best options we have (elitism).
-        sortedPopOld = sorted(population)
-        new_population.append(sortedPopOld[0])
-        new_population.append(sortedPopOld[1])
+        # sortedPopOld = sorted(population)
+        # try:
+        #     new_population.append(sortedPopOld[0])
+        #     new_population.append(sortedPopOld[1])
+        # except Exception as e:
+        #     print(len(sortedPopOld))
         
-        population = new_population
+        if len(new_population) > 0:
+            population = new_population
 
         gen_number += 1
         #if gen_number % 10 == 0: # Prints shortest path every 10 rounds.
