@@ -47,11 +47,12 @@ def calcDistance(cities):
 # Selecting the population.
 def selectPopulation(cities, size):
     population = []
-    for i in range(size): # size = number of possible paths.
-        c = cities.copy() # Copy in order to not change the original order of targets.
-        
-        cities_first_city_fixed = c[1:] # Remove the first target.
-        random.shuffle(cities_first_city_fixed) # Get a random path between the targets.
+    c = cities.copy() # Copy in order to not change the original order of targets.
+    cities_without_first = c[1:] # Remove the first target.
+    
+    for i in range(size): # size = number of possible paths.       
+        random.shuffle(cities_without_first) # Get a random path between the targets.
+        cities_first_city_fixed = cities_without_first
         cities_first_city_fixed.insert(0, c[0]) # Add the first target back to always be at the beginning of the chromosome.
         
         distance = calcDistance(cities_first_city_fixed) # Calculate the fitness value (= total distance between the targets).
@@ -131,8 +132,8 @@ def rankSelection(population):
 
 # Swap Mutation.
 def swapMutation(child_chromosome, lenCities):
-    point1 = random.randint(0, lenCities - 1)
-    point2 = random.randint(0, lenCities - 1)
+    point1 = random.randint(1, lenCities - 1)
+    point2 = random.randint(1, lenCities - 1)
     child_chromosome[point1], child_chromosome[point2] = ( # Selects 2 random genes and exchanges them.
         child_chromosome[point2],
         child_chromosome[point1],
@@ -142,15 +143,15 @@ def swapMutation(child_chromosome, lenCities):
 
 # Inversion Mutation.
 def inversionMutation(child_chromosome):
-    point = random.randint(0, len(child_chromosome)) # Select random index.
-    child_chromosome[0:point] = reversed(child_chromosome[0:point]) # Reverse the targets from the beginning of the chromosome to the selected index.
+    point = random.randint(1, len(child_chromosome)) # Select random index.
+    child_chromosome[1:point] = reversed(child_chromosome[1:point]) # Reverse the targets from the beginning of the chromosome to the selected index.
     child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)]) # Reverse the targets from the selected index to the end of chromosome.
     return child_chromosome
 
 # Inversion Mutation.
 def inversionMutation2(child_chromosome):
-    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
-    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    point1 = random.randint(1, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(1, len(child_chromosome)) # Select second random index.
     
     if(point1 > point2):
         temp = point1
@@ -162,8 +163,8 @@ def inversionMutation2(child_chromosome):
 
 # Scramble Mutation.
 def scrambleMutation(child_chromosome):
-    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
-    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    point1 = random.randint(1, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(1, len(child_chromosome)) # Select second random index.
     
     if(point1 > point2):
         temp = point1
@@ -286,7 +287,6 @@ def main():
     TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    #TARGET = 450.0 # Length of shortest path between all cities.
     K = 4 # The number groups to divide the targets.
     results = []
     color = ""
