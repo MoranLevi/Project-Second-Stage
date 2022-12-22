@@ -49,13 +49,9 @@ def selectPopulation(cities, size):
     population = []
     for i in range(size): # size = number of possible paths.
         c = cities.copy() # Copy in order to not change the original order of targets.
-        
-        cities_first_city_fixed = c[1:] # Remove the first target.
-        random.shuffle(cities_first_city_fixed) # Get a random path between the targets.
-        cities_first_city_fixed.insert(0, c[0]) # Add the first target back to always be at the beginning of the chromosome.
-        
-        distance = calcDistance(cities_first_city_fixed) # Calculate the fitness value (= total distance between the targets).
-        population.append([distance, cities_first_city_fixed]) # Adds the path (= chromosome) and its total distance to the papulation.
+        random.shuffle(c) # Get a random path between the targets.
+        distance = calcDistance(c) # Calculate the fitness value (= total distance between the targets).
+        population.append([distance, c]) # Adds the path (= chromosome) and its total distance to the papulation.
     fittest = sorted(population)[0] # Takes the fittest (= shortest path).
 
     return population, fittest # Returns the current population and the shortest path.
@@ -293,18 +289,15 @@ def main():
     
     cities = getCity() # Read targets from file.
 
-    for i in range(3):
+    for i in range(1):
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
-        
-        c = cities.copy()
-        cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
-        
-        kmeans.fit(cities_without_first) # Fill the clusters with the targets.
+        kmeans.fit(cities) # Fill the clusters with the targets.
         labels = kmeans.labels_ # Get the labels of the targets.
         
         # Create dictionary of the clusters (key = label, value = group of chromosomes).
-        clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
+        clusters = {i: getCluster(cities, labels, i) for i in range(kmeans.n_clusters)}
+                    
         
         #------------------------------ LOOP ------------------------------#
         sum_clusters = 0 # A veriable to sum total distance of all clusters.
@@ -312,9 +305,6 @@ def main():
         
         # Calculate shortest path for each cluster and sum their distances.
         for clusterOfCities in clusters.values():
-            
-            clusterOfCities.insert(0, c[0]) # Add the initial target to each cluster.
-            
             firstPopulation, firstFittest = selectPopulation(clusterOfCities, int(POPULATION_SIZE/K)) # Select initial population.
             answer, genNumber = geneticAlgorithm( # answer = shortest path that was found, genNumber = generation number.
                 firstPopulation,
@@ -348,10 +338,12 @@ def main():
             sum_clusters += answer[0]
         #---------------------------- END LOOP ----------------------------#
         
-        plt.title('Total Shortest Distance = ' + str(round(sum_clusters, 2)))
+        plt.title('Total shortest Distance = ' + str(round(sum_clusters, 2)))
         plt.show()
         results.append(sum_clusters)
 
+    #ax = plt.figure().gca()
+    #ax.xaxis.set_macluster_indexor_locator(MaxNLocator(integer=True))
     plt.plot(results, 'bo-')
     run = 0
     for res in results:
