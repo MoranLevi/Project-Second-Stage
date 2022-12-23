@@ -326,7 +326,7 @@ def main():
                 kmeans.fit(cities_without_first) # Fill the clusters with the targets.
                 labels = kmeans.labels_ # Get the labels of the targets.
                 
-                # Compute the silhouette score for the current model
+                # Compute the avg silhouette score for the current model
                 score = silhouette_score(cities_without_first, labels)
     
                 # Append the score to the list of scores
