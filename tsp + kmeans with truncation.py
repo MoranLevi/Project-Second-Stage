@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 # Get cities info.
 def getCity():
@@ -299,22 +300,51 @@ def main():
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
     #TARGET = 450.0 # Length of shortest path between all cities.
-    K = 4 # The number groups to divide the targets.
+    K = -1 # The number groups to divide the targets.
+    k_unknown = True
     results = []
     color = ""
-    
+
     cities = getCity() # Read targets from file.
 
     for i in range(3):
-        # Clustering the targets using KMeans
-        kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
+        
+        if k_unknown == True:
+            K = -1
+            
+        # Create a list to store the silhouette scores for each number of clusters
+        scores = []
         
         c = cities.copy()
         cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
         
+        if K == -1:
+            # Loop over a range of values for n_clusters
+            for n_clusters in range(2, 11):
+                # Create a KMeans model with the current value of n_clusters
+                kmeans = KMeans(n_clusters=n_clusters)
+            
+                kmeans.fit(cities_without_first) # Fill the clusters with the targets.
+                labels = kmeans.labels_ # Get the labels of the targets.
+                
+                # Compute the silhouette score for the current model
+                score = silhouette_score(cities_without_first, labels)
+    
+                # Append the score to the list of scores
+                scores.append([n_clusters, score])
+             
+            sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
+            K = sorted_scores[0][0]   
+        
+        # Clustering the targets using KMeans
+        kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
+            
+        c = cities.copy()
+        cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
+            
         kmeans.fit(cities_without_first) # Fill the clusters with the targets.
         labels = kmeans.labels_ # Get the labels of the targets.
-        
+           
         # Create dictionary of the clusters (key = label, value = group of chromosomes).
         clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
         
