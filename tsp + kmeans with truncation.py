@@ -242,7 +242,6 @@ def geneticAlgorithm(
             # Adding the two children to the new population.
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
-            
         # REPLACEMENT
         # Selecting two of the best options we have (elitism).
         # sortedPopOld = sorted(population)
@@ -300,8 +299,8 @@ def main():
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
     #TARGET = 450.0 # Length of shortest path between all cities.
-    K = -1 # The number groups to divide the targets.
-    k_unknown = True
+    K = 4 # The number groups to divide the targets.
+    k_unknown = True # symbolize if K of kmeans is known or unknown
     results = []
     color = ""
 
@@ -338,9 +337,6 @@ def main():
         
         # Clustering the targets using KMeans
         kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
-            
-        c = cities.copy()
-        cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
             
         kmeans.fit(cities_without_first) # Fill the clusters with the targets.
         labels = kmeans.labels_ # Get the labels of the targets.
