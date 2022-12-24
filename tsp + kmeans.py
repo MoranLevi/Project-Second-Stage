@@ -250,8 +250,8 @@ def main():
     TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 2 # The number groups to divide the targets.
-    k_unknown = True # Symbolize if K of kmeans is known or unknown
+    K = 4 # The number groups to divide the targets.
+    k_unknown = False # Symbolize if K of kmeans is known or unknown
     results = []
     color = ""
     
