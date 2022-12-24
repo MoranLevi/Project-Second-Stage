@@ -113,7 +113,6 @@ def scrambleMutation(child_chromosome):
 def geneticAlgorithm(
     population,
     lenCities, # The number of targets.
-    TOURNAMENT_SELECTION_SIZE, # The number of random chromosomes to compete to select 2 parents from them.
     TRUNC_SELECTION_SIZE, # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE, # The probability to perform a mutation operator.
     CROSSOVER_RATE, # The probability to perform a crossover operator.
@@ -227,19 +226,14 @@ def getCluster(cities, labels, label_index):
 def main():
     # Initial values.
     POPULATION_SIZE = 2000 # The number of possible paths.
-    TOURNAMENT_SELECTION_SIZE = 4 # The number of random chromosomes to compete to select 2 parents from them.
     TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 4 # The number groups to divide the targets.
-    k_unknown = True # Symbolize if K of kmeans is known or unknown
+    K = -1 # The number groups to divide the targets.
     results = []
     color = ""
 
     cities = getCity() # Read targets from file.
-
-    if k_unknown == True:
-        K = -1
             
     # Create a list to store the silhouette scores for each number of clusters
     scores = []
@@ -291,11 +285,9 @@ def main():
             answer, genNumber = geneticAlgorithm( # answer = shortest path that was found, genNumber = generation number.
                 firstPopulation,
                 len(clusterOfCities),
-                TOURNAMENT_SELECTION_SIZE,
                 TRUNC_SELECTION_SIZE,
                 MUTATION_RATE,
                 CROSSOVER_RATE,
-                #TARGET,
             )
             print("\n----------------------------------------------------------------")
             print("Generation: " + str(genNumber))
