@@ -1,12 +1,9 @@
 import random
 import math
 import matplotlib.pyplot as plt
-from random import shuffle
-from numpy.random import choice
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 # Get cities info.
 def getCity():
@@ -34,24 +31,17 @@ def calcDistance(cities):
 
         total_sum += d
 
-    # Adds the distance also between the first and the last targets.
-    #cityA = cities[0]
-    #cityB = cities[-1] # The last target.
-    #d = math.sqrt(math.pow(cityB[0] - cityA[0], 2) + math.pow(cityB[1] - cityA[1], 2))
-
-    #total_sum += d
-
     return total_sum
-
 
 # Selecting the population.
 def selectPopulation(cities, size):
     population = []
+    
     for i in range(size): # size = number of possible paths.
         c = cities.copy() # Copy in order to not change the original order of targets.
-        
-        cities_first_city_fixed = c[1:] # Remove the first target.
-        random.shuffle(cities_first_city_fixed) # Get a random path between the targets.
+        cities_without_first = c[1:] # Remove the first target.     
+        random.shuffle(cities_without_first) # Get a random path between the targets.
+        cities_first_city_fixed = cities_without_first
         cities_first_city_fixed.insert(0, c[0]) # Add the first target back to always be at the beginning of the chromosome.
         
         distance = calcDistance(cities_first_city_fixed) # Calculate the fitness value (= total distance between the targets).
@@ -59,16 +49,6 @@ def selectPopulation(cities, size):
     fittest = sorted(population)[0] # Takes the fittest (= shortest path).
 
     return population, fittest # Returns the current population and the shortest path.
-
-# Tournament Selection.
-def tournamentSelection(population, TOURNAMENT_SELECTION_SIZE):
-    parent_chromosome1 = sorted( # First parent.
-                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
-                )[0] # Selects k random paths, sorts them, and choose the shortest one.
-    parent_chromosome2 = sorted( # Second parent.
-                    random.choices(population, k=TOURNAMENT_SELECTION_SIZE)
-                )[0] # Selects k random paths, sorts them, and choose the shortest one.
-    return parent_chromosome1, parent_chromosome2
 
 # Trunaction Selection.
 def truncationSelection(trunc, population):
@@ -85,74 +65,28 @@ def truncationSelection(trunc, population):
     # Return the top "num_individuals_to_retain" individuals from the sorted population
     return sorted_population[:num_individuals_to_retain]
 
-# Trunaction Selection.
-def truncationSelectionOLD(trunc, population):
-    new_population = []
-    
-    # Sort the chromosomes according to their fitness value (distance).
-    sorted_fitness = sorted(population, key=lambda x: int(x[0]))
-    
-    for i in range(0, len(population)):
-        r = random.randint((1 - trunc) * len(population), len(population) - 1)
-        new_population.append(sorted_fitness[r])
-        
-    return sorted_fitness[0], sorted_fitness[1] 
-
-# Rank Selection.
-def rankSelection(population):
-    sorted_population = sorted(population)
-    ranked_population = []
-    
-    # Add rank to each chromosome.
-    # The fittest gets the highest rank.
-    # That because will make its probability the highest.
-    sum_of_probablities = 0
-    rank = len(population)
-    for i in range(len(population)):
-        ranked_population.append([rank, sorted_population[i]])
-        sum_of_probablities += rank
-        rank -= 1
-    
-    # Computes for each chromosome the probability.
-    chromosome_probabilities = []
-    chromosomes = list(range(len(population))) # A list of the chromosomes' indexes.
-    for i in range(len(population)):
-        chromosome_probability = ranked_population[i][0]/sum_of_probablities # Calculate each chromosome's probablity.
-        chromosome_probabilities.append(chromosome_probability)
-    
-    # Selects two chromosomes based on the computed probabilities.
-    # This NumPy's "choice" function that supports probability distributions.
-    # choice(list_of_candidates, number_of_items_to_pick, replace=False, p=probability_distribution)
-    # "replace=False" to change the behavior so that drawn items are not replaced,
-    # Default is True, meaning that a value of "a" can be selected multiple times.
-    chromosome1_index, chromosome2_index = choice(chromosomes, 2, replace=False, p=chromosome_probabilities)
-    parent_chromosome1 = sorted_population[int(chromosome1_index)]
-    parent_chromosome2 = sorted_population[int(chromosome2_index)]
-    
-    return parent_chromosome1, parent_chromosome2
-
 # Swap Mutation.
 def swapMutation(child_chromosome, lenCities):
-    point1 = random.randint(0, lenCities - 1)
-    point2 = random.randint(0, lenCities - 1)
+    point1 = random.randint(1, lenCities - 1)
+    point2 = random.randint(1, lenCities - 1)
     child_chromosome[point1], child_chromosome[point2] = ( # Selects 2 random genes and exchanges them.
         child_chromosome[point2],
         child_chromosome[point1],
-    )  
+    )
     return child_chromosome
 
 
 # Inversion Mutation.
 def inversionMutation(child_chromosome):
-    point = random.randint(0, len(child_chromosome)) # Select random index.
-    child_chromosome[0:point] = reversed(child_chromosome[0:point]) # Reverse the targets from the beginning of the chromosome to the selected index.
+    point = random.randint(1, len(child_chromosome)) # Select random index.
+    child_chromosome[1:point] = reversed(child_chromosome[1:point]) # Reverse the targets from the beginning of the chromosome to the selected index.
     child_chromosome[point:len(child_chromosome)] = reversed(child_chromosome[point:len(child_chromosome)]) # Reverse the targets from the selected index to the end of chromosome.
     return child_chromosome
 
 # Inversion Mutation.
 def inversionMutation2(child_chromosome):
-    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
-    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    point1 = random.randint(1, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(1, len(child_chromosome)) # Select second random index.
     
     if(point1 > point2):
         temp = point1
@@ -164,8 +98,8 @@ def inversionMutation2(child_chromosome):
 
 # Scramble Mutation.
 def scrambleMutation(child_chromosome):
-    point1 = random.randint(0, len(child_chromosome)) # Select first random index.
-    point2 = random.randint(0, len(child_chromosome)) # Select second random index.
+    point1 = random.randint(1, len(child_chromosome)) # Select first random index.
+    point2 = random.randint(1, len(child_chromosome)) # Select second random index.
     
     if(point1 > point2):
         temp = point1
@@ -173,7 +107,7 @@ def scrambleMutation(child_chromosome):
         point2 = temp
         
     random.shuffle(child_chromosome[point1:point2]) # Mix the targets within the two selected index.
-    return child_chromosome  
+    return child_chromosome
 
 # The Genetic Algorithm.
 def geneticAlgorithm(
@@ -241,7 +175,6 @@ def geneticAlgorithm(
             # Adding the two children to the new population.
             new_population.append([calcDistance(child_chromosome1), child_chromosome1])
             new_population.append([calcDistance(child_chromosome2), child_chromosome2])
-            
         # REPLACEMENT
         # Selecting two of the best options we have (elitism).
         # sortedPopOld = sorted(population)
@@ -298,33 +231,60 @@ def main():
     TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    #TARGET = 450.0 # Length of shortest path between all cities.
     K = 4 # The number groups to divide the targets.
+    k_unknown = True # Symbolize if K of kmeans is known or unknown
     results = []
     color = ""
-    
+
     cities = getCity() # Read targets from file.
 
+    if k_unknown == True:
+        K = -1
+            
+    # Create a list to store the silhouette scores for each number of clusters
+    scores = []
+        
+    c = cities.copy()
+    cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
+        
+    if K == -1:
+        # Loop over a range of values for n_clusters
+        for n_clusters in range(2, 11):
+            # Create a KMeans model with the current value of n_clusters
+            kmeans = KMeans(n_clusters=n_clusters)
+            
+            kmeans.fit(cities_without_first) # Fill the clusters with the targets.
+            labels = kmeans.labels_ # Get the labels of the targets.
+                
+            # Compute the avg silhouette score for the current model
+            score = silhouette_score(cities_without_first, labels)
+    
+            # Append the score to the list of scores
+            scores.append([n_clusters, score])
+             
+        sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
+        K = sorted_scores[0][0]
+        
+    # Clustering the targets using KMeans
+    kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
+            
+    kmeans.fit(cities_without_first) # Fill the clusters with the targets.
+    labels = kmeans.labels_ # Get the labels of the targets.
+           
+    # Create dictionary of the clusters (key = label, value = group of chromosomes).
+    clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
+        
     for i in range(3):
-        # Clustering the targets using KMeans
-        kmeans = KMeans(n_clusters = K) # Create new instance to be filled K clusters.
-        
-        c = cities.copy()
-        cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
-        
-        kmeans.fit(cities_without_first) # Fill the clusters with the targets.
-        labels = kmeans.labels_ # Get the labels of the targets.
-        
-        # Create dictionary of the clusters (key = label, value = group of chromosomes).
-        clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
-        
         #------------------------------ LOOP ------------------------------#
         sum_clusters = 0 # A veriable to sum total distance of all clusters.
         cluster_index = 0 # A veriable to decide each cluster's color.
         
         # Calculate shortest path for each cluster and sum their distances.
         for clusterOfCities in clusters.values():
-            
+            try:
+                clusterOfCities.remove(c[0])
+            except:
+                pass
             clusterOfCities.insert(0, c[0]) # Add the initial target to each cluster.
             
             firstPopulation, firstFittest = selectPopulation(clusterOfCities, int(POPULATION_SIZE/K)) # Select initial population.
