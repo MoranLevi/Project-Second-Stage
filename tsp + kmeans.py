@@ -9,7 +9,7 @@ from sklearn.metrics import silhouette_score
 # Get cities info.
 def getCity():
     cities = []
-    f = open("TSP51.txt")
+    f = open("‏‏TSP100.txt")
     for i in f.readlines():
         node_city_val = i.split()
         cities.append(
@@ -148,7 +148,7 @@ def geneticAlgorithm(
 ):
     gen_number = 0 # The generation index.
     
-    for i in range(20): # The number of generations.
+    for i in range(100): # The number of generations.
         new_population = []
         
         for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
@@ -248,7 +248,7 @@ def main():
     TOURNAMENT_SELECTION_SIZE = 4 # The number of random chromosomes to compete to select 2 parents from them.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = -1 # The number groups to divide the targets.
+    K = 4 # The number groups to divide the targets.
     results = []
     color = ""
     
@@ -260,7 +260,7 @@ def main():
     c = cities.copy()
     cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
         
-    if K == -1:
+    if K == -1: 
         # Loop over a range of values for n_clusters
         for n_clusters in range(2, 11):
             # Create a KMeans model with the current value of n_clusters
@@ -287,7 +287,7 @@ def main():
     # Create dictionary of the clusters (key = label, value = group of chromosomes).
     clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
     
-    for i in range(4):
+    for i in range(1):
         #------------------------------ LOOP ------------------------------#
         sum_clusters = 0 # A veriable to sum total distance of all clusters.
         cluster_index = 0 # A veriable to decide each cluster's color.

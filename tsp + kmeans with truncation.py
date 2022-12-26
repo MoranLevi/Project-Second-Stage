@@ -229,7 +229,7 @@ def main():
     TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = -1 # The number groups to divide the targets.
+    K = 3 # The number groups to divide the targets.
     results = []
     color = ""
 
