@@ -9,7 +9,7 @@ from sklearn.metrics import silhouette_score
 # Get cities info.
 def getCity():
     cities = []
-    f = open("‏‏TSP100.txt")
+    f = open("‏‏TSP100_good_also_for_5.txt")
     for i in f.readlines():
         node_city_val = i.split()
         cities.append(
@@ -334,7 +334,7 @@ def main():
         plt.title('Total Shortest Distance = ' + str(round(sum_clusters, 2)))
         plt.show()
         results.append(sum_clusters)
-
+    
     plt.plot(results, 'bo-')
     run = 0
     for res in results:
