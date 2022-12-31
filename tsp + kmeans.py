@@ -248,7 +248,7 @@ def main():
     TOURNAMENT_SELECTION_SIZE = 4 # The number of random chromosomes to compete to select 2 parents from them.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 5 # The number groups to divide the targets.
+    K = 4 # The number groups to divide the targets.
     results = []
     color = ""
     
@@ -323,7 +323,7 @@ def main():
             elif cluster_index == 3:
                 color = "gray"
             elif cluster_index == 4:
-                color = "pink"
+                color = "orange"
             else:
                 color = "brown"
             cluster_index += 1
