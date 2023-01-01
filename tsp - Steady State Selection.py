@@ -121,19 +121,24 @@ def geneticAlgorithm(
             parent_chromosome2 = population[fittest_parent2_index]
                 
             # CROSSOVER (Order Crossover Operator)
-            point = random.randint(0, lenCities - 1) # Selects a random index.
-            # First child.
-            child_chromosome1 = parent_chromosome1[1][0:point] # Selects a sub-path (from its beginning - to the "point" index).
-            for j in parent_chromosome2[1]: # Adds the missing targets from the second parent.
-                if (j in child_chromosome1) == False:
-                    child_chromosome1.append(j)
-            # Second child.
-            child_chromosome2 = parent_chromosome2[1][0:point]
-            for j in parent_chromosome1[1]:
-                if (j in child_chromosome2) == False:
-                    child_chromosome2.append(j)
+            if random.random() < CROSSOVER_RATE: # random.random() Returns a random number between 0.0 - 1.0.
+                point = random.randint(0, lenCities - 1) # Selects a random index.
+                # First child.
+                child_chromosome1 = parent_chromosome1[1][0:point] # Selects a sub-path (from its beginning - to the "point" index).
+                for j in parent_chromosome2[1]: # Adds the missing targets from the second parent.
+                    if (j in child_chromosome1) == False:
+                        child_chromosome1.append(j)
+                # Second child.
+                child_chromosome2 = parent_chromosome2[1][0:point]
+                for j in parent_chromosome1[1]:
+                    if (j in child_chromosome2) == False:
+                        child_chromosome2.append(j)
 
-
+            # If crossover not happen
+            else: # Choose two random paths.
+                child_chromosome1 = random.choices(population)[0][1]
+                child_chromosome2 = random.choices(population)[0][1]
+                
             # MUTATION
             if random.random() < MUTATION_RATE: # random.random() Returns a random number between 0.0 - 1.0.
                 #Swap Mutation
@@ -201,7 +206,7 @@ def main():
     STEADY_STATE_SELECTION_RATE = 0.6
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 4 # The number groups to divide the targets.
+    K = -1 # The number groups to divide the targets.
     results = []
     color = ""
     
@@ -276,7 +281,7 @@ def main():
             elif cluster_index == 3:
                 color = "gray"
             elif cluster_index == 4:
-                color = "orange"
+                color = "olive"
             else:
                 color = "brown"
             cluster_index += 1

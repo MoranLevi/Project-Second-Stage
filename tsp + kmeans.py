@@ -148,14 +148,14 @@ def geneticAlgorithm(
 ):
     gen_number = 0 # The generation index.
     
-    for i in range(100): # The number of generations.
+    for i in range(200): # The number of generations.
         new_population = []
         
         for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
             # SELECTION
             if random.random() < CROSSOVER_RATE: # random.random() Returns a random number between 0.0 - 1.0.
-                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
-                #parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(1, lenCities - 1) # Selects a random index.
@@ -248,7 +248,7 @@ def main():
     TOURNAMENT_SELECTION_SIZE = 4 # The number of random chromosomes to compete to select 2 parents from them.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 4 # The number groups to divide the targets.
+    K = -1 # The number groups to divide the targets.
     results = []
     color = ""
     
@@ -323,7 +323,7 @@ def main():
             elif cluster_index == 3:
                 color = "gray"
             elif cluster_index == 4:
-                color = "orange"
+                color = "olive"
             else:
                 color = "brown"
             cluster_index += 1
