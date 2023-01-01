@@ -8,7 +8,7 @@ from sklearn.metrics import silhouette_score
 # Get cities info.
 def getCity():
     cities = []
-    f = open("TSP51.txt")
+    f = open("‏‏TSP100_good_also_for_5.txt")
     for i in f.readlines():
         node_city_val = i.split()
         cities.append(
@@ -120,7 +120,7 @@ def geneticAlgorithm(
     gen_number = 0 # The generation index.
     
     
-    for i in range(20): # The number of generations.
+    for i in range(100): # The number of generations.
         new_population = []
         
         # SELECTION
@@ -156,12 +156,12 @@ def geneticAlgorithm(
             # MUTATION
             if random.random() < MUTATION_RATE: # random.random() Returns a random number between 0.0 - 1.0.
                 #Swap Mutation
-                child_chromosome1 = swapMutation(child_chromosome1, lenCities)
-                child_chromosome2 = swapMutation(child_chromosome2, lenCities)
+                #child_chromosome1 = swapMutation(child_chromosome1, lenCities)
+                #child_chromosome2 = swapMutation(child_chromosome2, lenCities)
                 
                 #Inversion Mutation
-                #child_chromosome1 = inversionMutation(child_chromosome1)
-                #child_chromosome2 = inversionMutation(child_chromosome2)
+                child_chromosome1 = inversionMutation(child_chromosome1)
+                child_chromosome2 = inversionMutation(child_chromosome2)
                 
                 #Inversion Mutation2
                 #child_chromosome1 = inversionMutation2(child_chromosome1)
@@ -226,10 +226,10 @@ def getCluster(cities, labels, label_index):
 def main():
     # Initial values.
     POPULATION_SIZE = 2000 # The number of possible paths.
-    TRUNC_SELECTION_SIZE = 0.1 # The percentage of the best chromosomes within the population to be selected for the next generation.
+    TRUNC_SELECTION_SIZE = 0.8 # The percentage of the best chromosomes within the population to be selected for the next generation.
     MUTATION_RATE = 0.1 # The probability to perform a mutation operator.
     CROSSOVER_RATE = 0.9 # The probability to perform a crossover operator.
-    K = 3 # The number groups to divide the targets.
+    K = 4 # The number groups to divide the targets.
     results = []
     color = ""
 
@@ -268,7 +268,7 @@ def main():
     # Create dictionary of the clusters (key = label, value = group of chromosomes).
     clusters = {i: getCluster(cities_without_first, labels, i) for i in range(kmeans.n_clusters)}
         
-    for i in range(3):
+    for i in range(1):
         #------------------------------ LOOP ------------------------------#
         sum_clusters = 0 # A veriable to sum total distance of all clusters.
         cluster_index = 0 # A veriable to decide each cluster's color.
@@ -304,7 +304,7 @@ def main():
             elif cluster_index == 3:
                 color = "gray"
             elif cluster_index == 4:
-                color = "pink"
+                color = "orange"
             else:
                 color = "brown"
             cluster_index += 1

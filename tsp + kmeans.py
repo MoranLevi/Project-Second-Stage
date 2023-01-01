@@ -154,8 +154,8 @@ def geneticAlgorithm(
         for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
             # SELECTION
             if random.random() < CROSSOVER_RATE: # random.random() Returns a random number between 0.0 - 1.0.
-                #parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
-                parent_chromosome1, parent_chromosome2 = rankSelection(population)
+                parent_chromosome1, parent_chromosome2 = tournamentSelection(population, TOURNAMENT_SELECTION_SIZE)
+                #parent_chromosome1, parent_chromosome2 = rankSelection(population)
                 
              # CROSSOVER (Order Crossover Operator)
                 point = random.randint(1, lenCities - 1) # Selects a random index.
@@ -178,12 +178,12 @@ def geneticAlgorithm(
             # MUTATION
             if random.random() < MUTATION_RATE: # random.random() Returns a random number between 0.0 - 1.0.
                 #Swap Mutation
-                child_chromosome1 = swapMutation(child_chromosome1, lenCities)
-                child_chromosome2 = swapMutation(child_chromosome2, lenCities)
+                #child_chromosome1 = swapMutation(child_chromosome1, lenCities)
+                #child_chromosome2 = swapMutation(child_chromosome2, lenCities)
                 
                 #Inversion Mutation
-                #child_chromosome1 = inversionMutation(child_chromosome1)
-                #child_chromosome2 = inversionMutation(child_chromosome2)
+                child_chromosome1 = inversionMutation(child_chromosome1)
+                child_chromosome2 = inversionMutation(child_chromosome2)
                 
                 #Inversion Mutation2
                 #child_chromosome1 = inversionMutation2(child_chromosome1)
