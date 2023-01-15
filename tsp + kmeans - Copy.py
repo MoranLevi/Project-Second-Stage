@@ -149,7 +149,7 @@ def geneticAlgorithm(
 ):
     gen_number = 0 # The generation index.
     
-    for i in range(10): # The number of generations.
+    for i in range(70): # The number of generations.
         new_population = []
         
         for i in range(int(len(population) / 2)): # Divided by two because we select two parents in each generation.
@@ -257,10 +257,7 @@ def main():
             
     # Create a list to store the silhouette scores for each number of clusters
     scores = []
-    
-    # Create a list to store the paths to send to front-end.
-    return_list = []
-    
+        
     c = cities.copy()
     cities_without_first = c[1:] # Remove the first target in order to add it again to all of the clusters.
         
@@ -333,11 +330,6 @@ def main():
             cluster_index += 1
             drawMap(cities, answer, color)
             sum_clusters += answer[0]
-            targets_list = answer[1]
-            targets_list_with_indexes = []
-            for target in targets_list:
-                targets_list_with_indexes.append(cities.index(target) + 1)
-            return_list.append(targets_list_with_indexes)
         #---------------------------- END LOOP ----------------------------#
         
         plt.title('Total Shortest Distance = ' + str(round(sum_clusters, 2)))
